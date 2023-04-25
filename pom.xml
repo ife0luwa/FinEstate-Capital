@@ -36,14 +36,18 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk</artifactId>
-            <version>1.11.1015</version>
+            <version>1.12.429</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-cognitoidp -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-cognitoidp</artifactId>
-            <version>1.11.1015</version>
+            <version>1.12.454</version>
         </dependency>
+
+
+
 
 
     </dependencies>
