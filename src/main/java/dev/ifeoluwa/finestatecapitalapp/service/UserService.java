@@ -2,6 +2,7 @@ package dev.ifeoluwa.finestatecapitalapp.service;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.*;
+import dev.ifeoluwa.finestatecapitalapp.dto.LoginDTO;
 import dev.ifeoluwa.finestatecapitalapp.dto.UserDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,10 +10,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.IOException;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author on 24/04/2023
@@ -34,21 +41,25 @@ public class UserService {
     @Autowired
     private AWSCognitoIdentityProvider cognitoClient;
 
+    @Autowired
+    private ImageService imageService;
 
 
-    public ResponseEntity<?> signUp(UserDTO userDTO) {
 
+    public ResponseEntity<?> signUp(String name, String email, String phoneNumber,
+                                    String password, MultipartFile picture) throws IOException {
+        String key = imageService.storeImage(picture.getOriginalFilename(), picture.getBytes());
         log.info("client id: ", clientId);
         try{
             AdminCreateUserRequest createUserRequest = new AdminCreateUserRequest()
                     .withUserPoolId(userPoolId)
-                    .withUsername(userDTO.getEmail())
+                    .withUsername(email)
                     .withTemporaryPassword("TempPass@123!")
                     .withDesiredDeliveryMediums(DeliveryMediumType.EMAIL)
                     .withUserAttributes(
-                            new AttributeType().withName("given_name").withValue(userDTO.getName()),
-                            new AttributeType().withName("phone_number").withValue(userDTO.getPhoneNumber()),
-                            new AttributeType().withName("picture").withValue(userDTO.getPicture())
+                            new AttributeType().withName("given_name").withValue(name),
+                            new AttributeType().withName("phone_number").withValue(phoneNumber),
+                            new AttributeType().withName("picture").withValue(key)
                     );
 
             AdminCreateUserResult createUserResult = cognitoClient.adminCreateUser(createUserRequest);
@@ -57,8 +68,8 @@ public class UserService {
 
             AdminSetUserPasswordRequest setPasswordRequest = new AdminSetUserPasswordRequest()
                     .withUserPoolId(userPoolId)
-                    .withUsername(userDTO.getEmail())
-                    .withPassword(userDTO.getPassword())
+                    .withUsername(email)
+                    .withPassword(password)
                     .withPermanent(true);
 
             AdminSetUserPasswordResult setPasswordResult = cognitoClient.adminSetUserPassword(setPasswordRequest);
@@ -74,6 +85,47 @@ public class UserService {
 
     }
 
+
+
+    public ResponseEntity<?> login(LoginDTO loginDTO) {
+
+        try{
+            Map<String, String> authParams = new HashMap<>();
+            authParams.put("USERNAME", loginDTO.getEmail());
+            authParams.put("PASSWORD", loginDTO.getPassword());
+            AdminInitiateAuthRequest authRequest = new AdminInitiateAuthRequest()
+                    .withAuthFlow(AuthFlowType.ADMIN_NO_SRP_AUTH)
+                    .withClientId(clientId)
+                    .withUserPoolId(userPoolId)
+                    .withAuthParameters(authParams);
+
+            AdminInitiateAuthResult authResult = cognitoClient.adminInitiateAuth(authRequest);
+
+            log.info("user authenticated: ", authResult);
+
+            return new ResponseEntity<>(authResult, HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("Error logging in user: {}", e.getMessage(), e);
+            throw new RuntimeException("Error logging in user", e);
+        }
+    }
+
+
+    public ResponseEntity<?> logout(String email) {
+        try {
+            AdminUserGlobalSignOutRequest signOutRequest = new AdminUserGlobalSignOutRequest()
+                    .withUserPoolId(userPoolId)
+                    .withUsername(email);
+
+            cognitoClient.adminUserGlobalSignOut(signOutRequest);
+
+            return new ResponseEntity<>("User logged out successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error logging out user: {}", e.getMessage(), e);
+            throw new RuntimeException("Error logging out user", e);
+        }
+    }
 
 
 
