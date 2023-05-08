@@ -3,21 +3,15 @@ package dev.ifeoluwa.finestatecapitalapp.service;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.*;
 import dev.ifeoluwa.finestatecapitalapp.dto.LoginDTO;
-import dev.ifeoluwa.finestatecapitalapp.dto.UserDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
-import java.util.Base64;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,7 +48,7 @@ public class UserService {
             AdminCreateUserRequest createUserRequest = new AdminCreateUserRequest()
                     .withUserPoolId(userPoolId)
                     .withUsername(email)
-                    .withTemporaryPassword("TempPass@123!")
+                    .withTemporaryPassword(password)
                     .withDesiredDeliveryMediums(DeliveryMediumType.EMAIL)
                     .withUserAttributes(
                             new AttributeType().withName("given_name").withValue(name),
@@ -66,11 +60,14 @@ public class UserService {
 
             log.info("new user created: ", createUserResult);
 
+
+
             AdminSetUserPasswordRequest setPasswordRequest = new AdminSetUserPasswordRequest()
                     .withUserPoolId(userPoolId)
                     .withUsername(email)
                     .withPassword(password)
                     .withPermanent(true);
+
 
             AdminSetUserPasswordResult setPasswordResult = cognitoClient.adminSetUserPassword(setPasswordRequest);
 

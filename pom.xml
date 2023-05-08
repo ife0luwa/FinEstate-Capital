@@ -38,31 +38,11 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Spring Boot Security Starter -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-
-        <!-- Web Security Configuration -->
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
-            <version>5.3.3.RELEASE</version>
-        </dependency>
-
-        <!-- Nimbus JOSE+JWT -->
-        <dependency>
-            <groupId>com.nimbusds</groupId>
-            <artifactId>nimbus-jose-jwt</artifactId>
-            <version>9.8.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.auth0</groupId>
-            <artifactId>java-jwt</artifactId>
-            <version>3.18.1</version>
-        </dependency>
+<!--        &lt;!&ndash; Spring Boot Security Starter &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-security</artifactId>-->
+<!--        </dependency>-->
 
 
 
@@ -77,7 +57,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-cognitoidp</artifactId>
-            <version>1.11.103</version>
+            <version>1.12.429</version>
         </dependency>
 
 
